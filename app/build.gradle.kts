@@ -6,6 +6,7 @@ plugins {
 android {
   namespace = "com.mark.client"
   compileSdk = 35
+  ndkVersion = "27.0.12077973"
   
   defaultConfig {
     applicationId = "com.mark.client"
@@ -46,8 +47,10 @@ android {
     targetCompatibility = JavaVersion.VERSION_17
   }
   
-  kotlinOptions {
-    jvmTarget = "17"
+  kotlin {
+    compilerOptions {
+      jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    }
   }
 }
 
