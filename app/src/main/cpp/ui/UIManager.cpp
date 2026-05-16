@@ -1,6 +1,4 @@
 #include "UIManager.h"
-#include "lib/Window.h"
-#include "lib/Tab.h"
 #include "lib/TextureManager.h"
 #include "../Client.h"
 #include "../modules/ModuleManager.h"
