@@ -19,7 +19,7 @@ void Client::init() {
 
 void Client::initImGui(ANativeWindow* window, int width, int height) {
   if (imguiInitialized) return;
-  imguiManager = std::make_unique<ImGuiManager>();
+  imguiManager = std::make_unique<<ImGuiManager>();
   imguiManager->init(window, width, height);
   imguiInitialized = true;
 }
