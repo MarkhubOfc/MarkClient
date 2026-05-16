@@ -11,8 +11,10 @@ public:
   void renderClickGUI();
   bool isVisible() { return showMenu; }
   void toggle() { showMenu = !showMenu; }
+  void show() { showMenu = true; }
+  void hide() { showMenu = false; }
 private:
-  bool showMenu = false;
+  bool showMenu = true;
   bool initialized = false;
   void setupStyle();
 };
