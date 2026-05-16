@@ -16,8 +16,8 @@ add_library(markclient SHARED
 )
 
 target_include_directories(markclient PRIVATE
-  ${CMAKE_SOURCE_DIR}/src/main/cpp
-  ${CMAKE_SOURCE_DIR}/src/main/cpp/vendor/imgui
+  ${CMAKE_SOURCE_DIR}
+  ${CMAKE_SOURCE_DIR}/vendor/imgui
 )
 
 target_link_libraries(markclient
