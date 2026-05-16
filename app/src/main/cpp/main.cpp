@@ -3,6 +3,9 @@
 #include <android/native_window_jni.h>
 #include <EGL/egl.h>
 #include <GLES3/gl3.h>
+#include "imgui.h"
+#include "imgui_impl_opengl3.h"
+#include "imgui_impl_android.h"
 #include "Client.h"
 
 static ANativeWindow* g_window = nullptr;
@@ -67,6 +70,11 @@ Java_com_mark_client_MainActivity_stringFromJNI(JNIEnv* env, jobject) {
 }
 
 extern "C" JNIEXPORT void JNICALL
+Java_com_mark_client_MainActivity_nativeInitClient(JNIEnv*, jobject) {
+  Client::get().init();
+}
+
+extern "C" JNIEXPORT void JNICALL
 Java_com_mark_client_MainActivity_nativeInitSurface(JNIEnv* env, jobject, jobject surface, jint width, jint height) {
   g_window = ANativeWindow_fromSurface(env, surface);
   if (!g_window) return;
@@ -80,7 +88,7 @@ Java_com_mark_client_MainActivity_nativeInitSurface(JNIEnv* env, jobject, jobjec
 extern "C" JNIEXPORT void JNICALL
 Java_com_mark_client_MainActivity_nativeRender(JNIEnv*, jobject) {
   if (!g_initialized) return;
-  
+  Client::get().tick();
   Client::get().render();
   eglSwapBuffers(g_display, g_surface);
 }
@@ -98,8 +106,18 @@ Java_com_mark_client_MainActivity_nativeShutdown(JNIEnv*, jobject) {
 }
 
 extern "C" JNIEXPORT void JNICALL
+Java_com_mark_client_MainActivity_nativeToggleMenu(JNIEnv*, jobject) {
+  if (!g_initialized) return;
+  Client::get().toggleMenu();
+}
+
+extern "C" JNIEXPORT void JNICALL
 Java_com_mark_client_MainActivity_nativeTouchEvent(JNIEnv*, jobject, jint action, jfloat x, jfloat y) {
-  // Hello bro
+  if (!g_initialized) return;
+  ImGuiIO& io = ImGui::GetIO();
+  io.MousePos = ImVec2(x, y);
+  if (action == 0) io.MouseDown[0] = true;
+  else if (action == 1 || action == 3) io.MouseDown[0] = false;
 }
 
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void*) {
