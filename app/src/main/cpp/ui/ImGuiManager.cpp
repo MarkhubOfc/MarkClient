@@ -11,6 +11,7 @@ void ImGuiManager::init(ANativeWindow* window, int width, int height) {
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
   ImGuiIO& io = ImGui::GetIO();
+  io.ConfigFlags |= ImGuiConfigFlags_IsTouchScreen;
   io.DisplaySize = ImVec2((float)width, (float)height);
   ImGui_ImplOpenGL3_Init("#version 300 es");
   ImGui_ImplAndroid_Init(window);
