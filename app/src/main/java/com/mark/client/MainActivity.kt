@@ -1,7 +1,11 @@
 package com.mark.client
 
 import android.app.Activity
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.Surface
@@ -27,6 +31,7 @@ class MainActivity : Activity() {
   private external fun stringFromJNI(): String
   private external fun nativeInitClient()
   private external fun nativeToggleMenu()
+  private external fun nativeForceShowMenu()
   private external fun nativeIsMenuVisible(): Boolean
   private external fun nativeInitSurface(surface: Surface, width: Int, height: Int)
   private external fun nativeRender()
@@ -37,10 +42,19 @@ class MainActivity : Activity() {
   private var choreographerCallback: Choreographer.FrameCallback? = null
   private var menuButton: Button? = null
   private var infoText: TextView? = null
-  private var clientInitialized = false
   
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+      if (!Settings.canDrawOverlays(this)) {
+        val intent = Intent(
+          Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+          Uri.parse("package:$packageName")
+        )
+        startActivity(intent)
+      }
+    }
     
     val layout = FrameLayout(this)
     
@@ -48,10 +62,7 @@ class MainActivity : Activity() {
       setZOrderOnTop(false)
       holder.addCallback(object : SurfaceHolder.Callback {
         override fun surfaceCreated(holder: SurfaceHolder) {
-          if (!clientInitialized) {
-            nativeInitClient()
-            clientInitialized = true
-          }
+          nativeInitClient()
           nativeInitSurface(holder.surface, width, height)
           infoText?.text = "Native OK | Menu: ${nativeIsMenuVisible()}"
           startRenderLoop()
@@ -69,16 +80,18 @@ class MainActivity : Activity() {
     
     infoText = TextView(this).apply {
       text = "Loading..."
-      textSize = 16f
+      textSize = 14f
       setTextColor(0xFF00FF00.toInt())
-      gravity = Gravity.CENTER
+      gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
     }
     
     menuButton = Button(this).apply {
-      text = "MENU"
+      text = "FORCE SHOW"
       setOnClickListener {
-        nativeToggleMenu()
-        updateButton()
+        nativeForceShowMenu()
+        val visible = nativeIsMenuVisible()
+        text = if (visible) "HIDE" else "SHOW"
+        infoText?.text = "Forced menu: $visible"
       }
     }
     
@@ -103,12 +116,6 @@ class MainActivity : Activity() {
     layout.addView(infoText, infoParams)
     layout.addView(menuButton, btnParams)
     setContentView(layout)
-  }
-  
-  private fun updateButton() {
-    val visible = nativeIsMenuVisible()
-    menuButton?.text = if (visible) "HIDE" else "MENU"
-    infoText?.text = "Menu visible: $visible"
   }
   
   private fun startRenderLoop() {
