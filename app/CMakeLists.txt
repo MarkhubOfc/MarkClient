@@ -10,7 +10,7 @@ file(GLOB IMGUI_SOURCES
   "${CMAKE_SOURCE_DIR}/src/main/cpp/vendor/imgui/*.cpp"
 )
 
-add_library(markclient SHARED 
+add_library(markclient SHARED
   ${SOURCES}
   ${IMGUI_SOURCES}
 )
@@ -18,6 +18,7 @@ add_library(markclient SHARED
 target_include_directories(markclient PRIVATE
   ${CMAKE_SOURCE_DIR}/src/main/cpp
   ${CMAKE_SOURCE_DIR}/src/main/cpp/vendor/imgui
+  ${CMAKE_SOURCE_DIR}/src/main/cpp/vendor/stb
 )
 
 target_link_libraries(markclient
