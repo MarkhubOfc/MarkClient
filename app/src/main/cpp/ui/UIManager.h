@@ -3,11 +3,8 @@
 #include <GLES3/gl3.h>
 #include <memory>
 #include <vector>
-
-namespace LoadLib {
-    class Window;
-    class Tab;
-}
+#include "lib/Window.h"
+#include "lib/Tab.h"
 
 class UIManager {
 public:
