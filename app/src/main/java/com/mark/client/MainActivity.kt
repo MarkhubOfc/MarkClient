@@ -36,57 +36,49 @@ class MainActivity : Activity() {
   private var surfaceView: SurfaceView? = null
   private var choreographerCallback: Choreographer.FrameCallback? = null
   private var menuButton: Button? = null
-  private var statusText: TextView? = null
+  private var infoText: TextView? = null
+  private var clientInitialized = false
   
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     
     val layout = FrameLayout(this)
     
-    statusText = TextView(this).apply {
-      text = "Status: Initializing..."
-      textSize = 14f
-      setTextColor(0xFF00FF00.toInt())
-      gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
-    }
-    
     surfaceView = SurfaceView(this).apply {
       setZOrderOnTop(false)
       holder.addCallback(object : SurfaceHolder.Callback {
         override fun surfaceCreated(holder: SurfaceHolder) {
-          statusText?.text = "Status: Surface created"
-          nativeInitClient()
+          if (!clientInitialized) {
+            nativeInitClient()
+            clientInitialized = true
+          }
           nativeInitSurface(holder.surface, width, height)
-          statusText?.text = "Status: Native init done, menu=" + nativeIsMenuVisible()
+          infoText?.text = "Native OK | Menu: ${nativeIsMenuVisible()}"
           startRenderLoop()
         }
         override fun surfaceChanged(holder: SurfaceHolder, format: Int, w: Int, h: Int) {
-          statusText?.text = "Status: Surface changed"
           nativeShutdown()
           nativeInitSurface(holder.surface, w, h)
         }
         override fun surfaceDestroyed(holder: SurfaceHolder) {
-          statusText?.text = "Status: Surface destroyed"
           stopRenderLoop()
           nativeShutdown()
         }
       })
     }
     
-    val tv = TextView(this).apply {
-      text = "Mark Client v1.0\n${stringFromJNI()}"
-      textSize = 20f
-      setTextColor(0xFFFFFFFF.toInt())
+    infoText = TextView(this).apply {
+      text = "Loading..."
+      textSize = 16f
+      setTextColor(0xFF00FF00.toInt())
       gravity = Gravity.CENTER
     }
     
     menuButton = Button(this).apply {
-      text = "HIDE"
+      text = "MENU"
       setOnClickListener {
         nativeToggleMenu()
-        val visible = nativeIsMenuVisible()
-        text = if (visible) "HIDE" else "MENU"
-        statusText?.text = "Status: Menu toggled, visible=$visible"
+        updateButton()
       }
     }
     
@@ -99,19 +91,24 @@ class MainActivity : Activity() {
       rightMargin = 50
     }
     
-    val statusParams = FrameLayout.LayoutParams(
+    val infoParams = FrameLayout.LayoutParams(
       FrameLayout.LayoutParams.MATCH_PARENT,
       FrameLayout.LayoutParams.WRAP_CONTENT
     ).apply {
       gravity = Gravity.BOTTOM
-      bottomMargin = 100
+      bottomMargin = 150
     }
     
     layout.addView(surfaceView)
-    layout.addView(tv)
+    layout.addView(infoText, infoParams)
     layout.addView(menuButton, btnParams)
-    layout.addView(statusText, statusParams)
     setContentView(layout)
+  }
+  
+  private fun updateButton() {
+    val visible = nativeIsMenuVisible()
+    menuButton?.text = if (visible) "HIDE" else "MENU"
+    infoText?.text = "Menu visible: $visible"
   }
   
   private fun startRenderLoop() {
