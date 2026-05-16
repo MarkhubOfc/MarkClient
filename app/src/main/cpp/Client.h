@@ -21,7 +21,9 @@ public:
 
 private:
     Client() = default;
-    ~Client() = default;
+    ~Client();
+    Client(const Client&) = delete;
+    Client& operator=(const Client&) = delete;
     std::unique_ptr<ModuleManager> moduleManager;
     std::unique_ptr<UIManager> uiManager;
     bool initialized = false;
