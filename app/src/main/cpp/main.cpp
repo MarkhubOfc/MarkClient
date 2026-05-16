@@ -115,6 +115,12 @@ Java_com_mark_client_MainActivity_nativeToggleMenu(JNIEnv*, jobject) {
   Client::get().toggleMenu();
 }
 
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_mark_client_MainActivity_nativeIsMenuVisible(JNIEnv*, jobject) {
+  if (!g_initialized) return JNI_FALSE;
+  return Client::get().getImGuiManager()->isVisible() ? JNI_TRUE : JNI_FALSE;
+}
+
 extern "C" JNIEXPORT void JNICALL
 Java_com_mark_client_MainActivity_nativeTouchEvent(JNIEnv*, jobject, jint action, jfloat x, jfloat y) {
   if (!g_initialized) return;
