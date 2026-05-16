@@ -8,6 +8,10 @@
 #include "imgui_impl_android.h"
 #include "Client.h"
 
+#define MotionEvent_ACTION_DOWN 0
+#define MotionEvent_ACTION_UP 1
+#define MotionEvent_ACTION_MOVE 2
+
 static ANativeWindow* g_window = nullptr;
 static EGLDisplay g_display = EGL_NO_DISPLAY;
 static EGLSurface g_surface = EGL_NO_SURFACE;
@@ -116,8 +120,11 @@ Java_com_mark_client_MainActivity_nativeTouchEvent(JNIEnv*, jobject, jint action
   if (!g_initialized) return;
   ImGuiIO& io = ImGui::GetIO();
   io.MousePos = ImVec2(x, y);
-  if (action == 0) io.MouseDown[0] = true;
-  else if (action == 1 || action == 3) io.MouseDown[0] = false;
+  if (action == MotionEvent_ACTION_DOWN) {
+    io.MouseDown[0] = true;
+  } else if (action == MotionEvent_ACTION_UP || action == MotionEvent_ACTION_MOVE) {
+    io.MouseDown[0] = false;
+  }
 }
 
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void*) {
