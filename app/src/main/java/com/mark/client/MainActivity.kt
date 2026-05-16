@@ -7,7 +7,6 @@ import android.view.MotionEvent
 import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.SurfaceView
-import android.view.View
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.TextView
@@ -28,6 +27,7 @@ class MainActivity : Activity() {
   private external fun stringFromJNI(): String
   private external fun nativeInitClient()
   private external fun nativeToggleMenu()
+  private external fun nativeIsMenuVisible(): Boolean
   private external fun nativeInitSurface(surface: Surface, width: Int, height: Int)
   private external fun nativeRender()
   private external fun nativeShutdown()
@@ -35,26 +35,38 @@ class MainActivity : Activity() {
   
   private var surfaceView: SurfaceView? = null
   private var choreographerCallback: Choreographer.FrameCallback? = null
+  private var menuButton: Button? = null
+  private var statusText: TextView? = null
   
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     
-    nativeInitClient()
-    
     val layout = FrameLayout(this)
+    
+    statusText = TextView(this).apply {
+      text = "Status: Initializing..."
+      textSize = 14f
+      setTextColor(0xFF00FF00.toInt())
+      gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
+    }
     
     surfaceView = SurfaceView(this).apply {
       setZOrderOnTop(false)
       holder.addCallback(object : SurfaceHolder.Callback {
         override fun surfaceCreated(holder: SurfaceHolder) {
+          statusText?.text = "Status: Surface created"
+          nativeInitClient()
           nativeInitSurface(holder.surface, width, height)
+          statusText?.text = "Status: Native init done, menu=" + nativeIsMenuVisible()
           startRenderLoop()
         }
         override fun surfaceChanged(holder: SurfaceHolder, format: Int, w: Int, h: Int) {
+          statusText?.text = "Status: Surface changed"
           nativeShutdown()
           nativeInitSurface(holder.surface, w, h)
         }
         override fun surfaceDestroyed(holder: SurfaceHolder) {
+          statusText?.text = "Status: Surface destroyed"
           stopRenderLoop()
           nativeShutdown()
         }
@@ -68,9 +80,14 @@ class MainActivity : Activity() {
       gravity = Gravity.CENTER
     }
     
-    val btn = Button(this).apply {
-      text = "MENU"
-      setOnClickListener { nativeToggleMenu() }
+    menuButton = Button(this).apply {
+      text = "HIDE"
+      setOnClickListener {
+        nativeToggleMenu()
+        val visible = nativeIsMenuVisible()
+        text = if (visible) "HIDE" else "MENU"
+        statusText?.text = "Status: Menu toggled, visible=$visible"
+      }
     }
     
     val btnParams = FrameLayout.LayoutParams(
@@ -82,9 +99,18 @@ class MainActivity : Activity() {
       rightMargin = 50
     }
     
+    val statusParams = FrameLayout.LayoutParams(
+      FrameLayout.LayoutParams.MATCH_PARENT,
+      FrameLayout.LayoutParams.WRAP_CONTENT
+    ).apply {
+      gravity = Gravity.BOTTOM
+      bottomMargin = 100
+    }
+    
     layout.addView(surfaceView)
     layout.addView(tv)
-    layout.addView(btn, btnParams)
+    layout.addView(menuButton, btnParams)
+    layout.addView(statusText, statusParams)
     setContentView(layout)
   }
   
