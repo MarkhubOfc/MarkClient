@@ -56,6 +56,7 @@ bool initEGL() {
   eglQuerySurface(g_display, g_surface, EGL_HEIGHT, &g_height);
   
   glViewport(0, 0, g_width, g_height);
+  
   return true;
 }
 
@@ -114,6 +115,12 @@ extern "C" JNIEXPORT void JNICALL
 Java_com_mark_client_MainActivity_nativeToggleMenu(JNIEnv*, jobject) {
   if (!g_initialized) return;
   Client::get().toggleMenu();
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_mark_client_MainActivity_nativeForceShowMenu(JNIEnv*, jobject) {
+  if (!g_initialized) return;
+  Client::get().getImGuiManager()->show();
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
