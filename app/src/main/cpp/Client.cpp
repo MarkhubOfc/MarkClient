@@ -10,27 +10,22 @@ Client& Client::get() {
 
 void Client::init() {
   if (initialized) return;
-  
   Logger::info("Initializing Mark Client");
-  
   moduleManager = std::make_unique<ModuleManager>();
   moduleManager->init();
-  
   initialized = true;
   Logger::info("Client initialized successfully!");
 }
 
-void Client::initImGui(EGLDisplay display, EGLSurface surface, int width, int height) {
+void Client::initImGui(ANativeWindow* window, int width, int height) {
   if (imguiInitialized) return;
-  
   imguiManager = std::make_unique<ImGuiManager>();
-  imguiManager->init(display, surface, width, height);
+  imguiManager->init(window, width, height);
   imguiInitialized = true;
 }
 
 void Client::shutdown() {
   if (!initialized) return;
-  
   Logger::info("Shutting down client...");
   if (imguiManager) imguiManager->shutdown();
   moduleManager.reset();
