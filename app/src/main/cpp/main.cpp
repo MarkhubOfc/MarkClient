@@ -7,6 +7,7 @@
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_android.h"
 #include "Client.h"
+#include "ui/ImGuiManager.h"
 
 #define MotionEvent_ACTION_DOWN 0
 #define MotionEvent_ACTION_UP 1
