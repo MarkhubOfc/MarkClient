@@ -8,6 +8,8 @@ Client& Client::get() {
     return instance;
 }
 
+Client::~Client() = default;
+
 void Client::init() {
     if (initialized) return;
     Logger::info("Initializing Mark Client");
