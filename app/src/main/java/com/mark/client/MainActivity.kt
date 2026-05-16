@@ -47,7 +47,10 @@ class MainActivity : Activity() {
           nativeInitSurface(holder.surface, width, height)
           startRenderLoop()
         }
-        override fun surfaceChanged(holder: SurfaceHolder, format: Int, w: Int, h: Int) {}
+        override fun surfaceChanged(holder: SurfaceHolder, format: Int, w: Int, h: Int) {
+          nativeShutdown()
+          nativeInitSurface(holder.surface, w, h)
+        }
         override fun surfaceDestroyed(holder: SurfaceHolder) {
           stopRenderLoop()
           nativeShutdown()
