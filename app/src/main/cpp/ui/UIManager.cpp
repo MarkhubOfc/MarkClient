@@ -32,15 +32,13 @@ void UIManager::setupWindow() {
     auto* mm = Client::get().getModuleManager();
     if (!mm) return;
 
-    auto modules = mm->getModules();
-    std::vector<LoadLib::Tab*> categoryTabs;
     const char* catNames[] = {"Combat", "Movement", "Render", "World", "Misc"};
     const char* catIcons[] = {
         "Icon/combat.png",
         "Icon/movement.png",
-        "Icon/render.png",
-        "Icon/world.png",
-        "Icon/misc.png"
+        "Icon/combat.png", // Fallback para ícones ausentes
+        "Icon/movement.png",
+        "Icon/combat.png"
     };
 
     for (int i = 0; i < 5; i++) {
@@ -63,12 +61,8 @@ void UIManager::setupWindow() {
             tabPtr->addToggle(toggle);
         }
 
-        categoryTabs.push_back(tabPtr);
+        mainWindow->addTab(tabPtr);
         tabs.push_back(std::move(tab));
-    }
-
-    for (auto* t : categoryTabs) {
-        mainWindow->addTab(t);
     }
 }
 

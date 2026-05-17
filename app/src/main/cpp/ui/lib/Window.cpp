@@ -75,19 +75,19 @@ void Window::init(int sw, int sh, AAssetManager* assetMgr) {
 
 void Window::setupTheme() {
     if (config.theme == WindowTheme::Dark) {
-        themeColors["bg"] = Color(0.05f, 0.05f, 0.05f, 0.95f);
-        themeColors["header"] = Color(0.06f, 0.06f, 0.06f, 1.0f);
-        themeColors["headerActive"] = Color(0.0f, 0.47f, 0.84f, 1.0f);
-        themeColors["content"] = Color(0.08f, 0.08f, 0.08f, 1.0f);
-        themeColors["border"] = Color(0.0f, 0.47f, 0.84f, 1.0f);
+        themeColors["bg"] = Color(0.00f, 0.00f, 0.00f, 0.98f);
+        themeColors["header"] = Color(0.00f, 0.00f, 0.00f, 1.0f);
+        themeColors["headerActive"] = Color(0.00f, 0.47f, 0.84f, 1.0f);
+        themeColors["content"] = Color(0.05f, 0.05f, 0.05f, 1.0f);
+        themeColors["border"] = Color(0.00f, 0.47f, 0.84f, 1.0f);
         themeColors["text"] = Color(1.0f, 1.0f, 1.0f, 1.0f);
         themeColors["textDisabled"] = Color(0.5f, 0.5f, 0.5f, 1.0f);
-        themeColors["tabInactive"] = Color(0.12f, 0.12f, 0.12f, 1.0f);
-        themeColors["tabActive"] = Color(0.0f, 0.47f, 0.84f, 1.0f);
-        themeColors["button"] = Color(0.15f, 0.15f, 0.15f, 1.0f);
-        themeColors["buttonHover"] = Color(0.25f, 0.25f, 0.25f, 1.0f);
-        themeColors["buttonActive"] = Color(0.0f, 0.6f, 1.0f, 1.0f);
-        themeColors["accent"] = Color(1.0f, 0.84f, 0.0f, 1.0f);
+        themeColors["tabInactive"] = Color(0.08f, 0.08f, 0.08f, 1.0f);
+        themeColors["tabActive"] = Color(0.00f, 0.47f, 0.84f, 1.0f);
+        themeColors["button"] = Color(0.10f, 0.10f, 0.10f, 1.0f);
+        themeColors["buttonHover"] = Color(1.00f, 0.84f, 0.00f, 0.8f);
+        themeColors["buttonActive"] = Color(1.00f, 0.84f, 0.00f, 1.0f);
+        themeColors["accent"] = Color(1.00f, 0.84f, 0.00f, 1.0f);
     } else {
         themeColors["bg"] = Color(0.95f, 0.95f, 0.95f, 0.95f);
         themeColors["header"] = Color(0.9f, 0.9f, 0.9f, 1.0f);
@@ -99,8 +99,8 @@ void Window::setupTheme() {
         themeColors["tabInactive"] = Color(0.85f, 0.85f, 0.85f, 1.0f);
         themeColors["tabActive"] = Color(0.0f, 0.47f, 0.84f, 1.0f);
         themeColors["button"] = Color(0.8f, 0.8f, 0.8f, 1.0f);
-        themeColors["buttonHover"] = Color(0.7f, 0.7f, 0.7f, 1.0f);
-        themeColors["buttonActive"] = Color(0.0f, 0.6f, 1.0f, 1.0f);
+        themeColors["buttonHover"] = Color(1.0f, 0.84f, 0.0f, 0.8f);
+        themeColors["buttonActive"] = Color(1.0f, 0.84f, 0.0f, 1.0f);
         themeColors["accent"] = Color(1.0f, 0.84f, 0.0f, 1.0f);
     }
 }

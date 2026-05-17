@@ -72,8 +72,14 @@ object LoadLib {
         fun getSurfaceView(): SurfaceView? = surfaceView
     }
 
-    fun Window(config: WindowConfig.() -> Unit): WindowBuilder {
+    fun Window(context: Context, config: WindowConfig.() -> Unit): WindowBuilder {
         val cfg = WindowConfig().apply(config)
-        return WindowBuilder(cfg)
+        return WindowBuilder(context).apply {
+            title(cfg.title)
+            theme(cfg.theme)
+            size(cfg.width, cfg.height)
+            draggable(cfg.draggable)
+            closable(cfg.closable)
+        }
     }
 }

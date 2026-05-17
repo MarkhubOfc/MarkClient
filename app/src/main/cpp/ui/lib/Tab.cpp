@@ -1,12 +1,10 @@
 #include "Tab.h"
+#include "Window.h"
+#include "TextureManager.h"
 
 namespace LoadLib {
 
 Tab::Tab(const TabConfig& cfg) : config(cfg) {
-    loadIcon();
-}
-
-void Tab::loadIcon() {
     if (!config.icon.empty()) {
         iconTexture = TextureManager::get().loadTexture(config.icon);
     }
@@ -26,7 +24,6 @@ void Tab::addSlider(const Slider& slider) {
 
 void Tab::drawIcon(const Rect& rect, Window* window) {
     if (!iconTexture || !iconTexture->id) return;
-
     TextureManager::get().bindTexture(iconTexture->id, 0);
 
     static const char* vs = R"(
@@ -73,12 +70,7 @@ void Tab::drawIcon(const Rect& rect, Window* window) {
         glDeleteShader(v);
         glDeleteShader(f);
 
-        float verts[] = {
-            0,0, 0,1,
-            1,0, 1,1,
-            0,1, 0,0,
-            1,1, 1,0
-        };
+        float verts[] = {0,0, 0,1, 1,0, 1,1, 0,1, 0,0, 1,1, 1,0};
         glGenVertexArrays(1, &vao);
         glGenBuffers(1, &vbo);
         glBindVertexArray(vao);
@@ -98,41 +90,6 @@ void Tab::drawIcon(const Rect& rect, Window* window) {
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
-void Tab::drawButton(const Button& btn, const Rect& rect, Window* window, bool hovered) {
-    Color bg = btn.enabled
-        ? (hovered ? window->getThemeColor("buttonHover") : window->getThemeColor("button"))
-        : window->getThemeColor("textDisabled");
-    Color border = hovered ? window->getThemeColor("accent") : window->getThemeColor("border");
-
-    window->drawRect(rect, bg);
-    window->drawBorder(rect, border, 1.0f);
-}
-
-void Tab::drawToggle(const Toggle& toggle, const Rect& rect, Window* window, bool hovered) {
-    bool val = toggle.value ? *toggle.value : false;
-    Color bg = val ? window->getThemeColor("tabActive") : window->getThemeColor("button");
-    if (hovered && !val) bg = window->getThemeColor("buttonHover");
-
-    Rect knob(rect.x + rect.w - 50, rect.y + 5, 40, rect.h - 10);
-    window->drawRect(rect, window->getThemeColor("content"));
-    window->drawRect(knob, bg);
-    window->drawBorder(knob, window->getThemeColor("border"), 1.0f);
-}
-
-void Tab::drawSlider(const Slider& slider, const Rect& rect, Window* window, bool hovered) {
-    float pct = (slider.value ? *slider.value : slider.min) / (slider.max - slider.min);
-    if (pct < 0) pct = 0;
-    if (pct > 1) pct = 1;
-
-    Rect track(rect.x, rect.y + rect.h * 0.4f, rect.w, 8);
-    Rect fill(rect.x, track.y, track.w * pct, track.h);
-    Rect knob(rect.x + track.w * pct - 10, track.y - 6, 20, 20);
-
-    window->drawRect(track, window->getThemeColor("button"));
-    window->drawRect(fill, window->getThemeColor("tabActive"));
-    window->drawRect(knob, hovered ? window->getThemeColor("accent") : window->getThemeColor("text"));
-}
-
 void Tab::render(const Rect& content, Window* window) {
     float pad = 12;
     float itemH = 50;
@@ -145,62 +102,63 @@ void Tab::render(const Rect& content, Window* window) {
 
     for (const auto& btn : buttons) {
         Rect r(cx, cy, colW, itemH);
-        bool hovered = false;
-        drawButton(btn, r, window, hovered);
+        window->drawRect(r, window->getThemeColor("button"));
+        window->drawBorder(r, window->getThemeColor("border"), 1.0f);
         cx += colW + pad;
         col++;
         if (col >= 3) { col = 0; cx = content.x + pad; cy += itemH + pad; }
     }
 
-    if (col > 0) { col = 0; cx = content.x + pad; cy += itemH + pad; }
+    if (col > 0) { cy += itemH + pad; }
+    cx = content.x + pad;
 
     for (const auto& toggle : toggles) {
         Rect r(cx, cy, content.w - pad * 2, itemH);
-        bool hovered = false;
-        drawToggle(toggle, r, window, hovered);
+        bool val = toggle.value ? *toggle.value : false;
+        window->drawRect(r, window->getThemeColor("content"));
+        Rect knob(r.x + r.w - 50, r.y + 5, 40, r.h - 10);
+        window->drawRect(knob, val ? window->getThemeColor("tabActive") : window->getThemeColor("button"));
+        window->drawBorder(knob, window->getThemeColor("border"), 1.0f);
         cy += itemH + pad;
     }
 
     for (const auto& slider : sliders) {
         Rect r(cx, cy, content.w - pad * 2, itemH);
-        bool hovered = false;
-        drawSlider(slider, r, window, hovered);
+        float pct = (slider.value ? *slider.value : slider.min) / (slider.max - slider.min);
+        if (pct < 0) pct = 0; if (pct > 1) pct = 1;
+        Rect track(r.x, r.y + r.h * 0.4f, r.w, 8);
+        Rect fill(r.x, track.y, track.w * pct, track.h);
+        window->drawRect(track, window->getThemeColor("button"));
+        window->drawRect(fill, window->getThemeColor("tabActive"));
         cy += itemH + pad;
     }
 }
 
 void Tab::handleTouch(float x, float y, bool down, const Rect& content) {
     if (!down) return;
-
     float pad = 12;
     float itemH = 50;
     float colW = (content.w - pad * 4) / 3.0f;
-    if (colW < 100) colW = 100;
-
     float cx = content.x + pad;
     float cy = content.y + pad;
     int col = 0;
 
     for (auto& btn : buttons) {
         Rect r(cx, cy, colW, itemH);
-        if (r.contains(x, y) && btn.enabled && btn.onClick) {
-            btn.onClick();
-            return;
-        }
+        if (r.contains(x, y) && btn.enabled && btn.onClick) { btn.onClick(); return; }
         cx += colW + pad;
         col++;
         if (col >= 3) { col = 0; cx = content.x + pad; cy += itemH + pad; }
     }
 
-    if (col > 0) { col = 0; cx = content.x + pad; cy += itemH + pad; }
+    if (col > 0) { cy += itemH + pad; }
+    cx = content.x + pad;
 
     for (auto& toggle : toggles) {
         Rect r(cx, cy, content.w - pad * 2, itemH);
-        if (r.contains(x, y)) {
-            if (toggle.value) {
-                *toggle.value = !*toggle.value;
-                if (toggle.onChange) toggle.onChange(*toggle.value);
-            }
+        if (r.contains(x, y) && toggle.value) {
+            *toggle.value = !*toggle.value;
+            if (toggle.onChange) toggle.onChange(*toggle.value);
             return;
         }
         cy += itemH + pad;
@@ -209,12 +167,8 @@ void Tab::handleTouch(float x, float y, bool down, const Rect& content) {
     for (auto& slider : sliders) {
         Rect r(cx, cy, content.w - pad * 2, itemH);
         if (r.contains(x, y)) {
-            float trackX = r.x;
-            float trackW = r.w;
-            float relX = x - trackX;
-            float pct = relX / trackW;
-            if (pct < 0) pct = 0;
-            if (pct > 1) pct = 1;
+            float pct = (x - r.x) / r.w;
+            if (pct < 0) pct = 0; if (pct > 1) pct = 1;
             float newVal = slider.min + pct * (slider.max - slider.min);
             if (slider.value) *slider.value = newVal;
             if (slider.onChange) slider.onChange(newVal);
